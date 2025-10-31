@@ -25,6 +25,8 @@ Para esse projeto, além de mudarmos o JSON para o JSON Server, vamos permitir o
 
 <<  COLOQUE A IMAGEM AQUI >>
 
+// Acabei montando o projeto e esqueci de tirar as prints dos testes, não vou conseguir entregar porque estou saindo de viagem neste exato momento, mas ta funcional!
+
 ## Como executar
 
 1. Instale as dependências:
