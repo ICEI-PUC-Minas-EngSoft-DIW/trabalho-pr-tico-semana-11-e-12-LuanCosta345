@@ -6,10 +6,10 @@ Para esse projeto, além de mudarmos o JSON para o JSON Server, vamos permitir o
 
 ## Informações do trabalho
 
-- Nome:
-- Matricula:
-- Proposta de projeto escolhida:
-- Breve descrição sobre seu projeto:
+- Nome: Luan Costa
+- Matricula: 
+- Proposta de projeto escolhida: Cachoeira do Tabuleiro (Trilhas/Pontos)
+- Breve descrição sobre seu projeto: Site com informações, trilhas, galeria e CRUD de itens via JSONServer.
 
 **Print dos testes da API com Postman ou similar**
 
@@ -24,6 +24,64 @@ Para esse projeto, além de mudarmos o JSON para o JSON Server, vamos permitir o
 **Print da aba NETWORK com requisições Fetch/XHR POST e GET**
 
 <<  COLOQUE A IMAGEM AQUI >>
+
+## Como executar
+
+1. Instale as dependências:
+
+   ```bash
+   npm install
+   ```
+
+2. Inicie o servidor (API + site estático):
+
+   ```bash
+   npm start
+   ```
+
+3. Acesse:
+
+- Front-end: [http://localhost:3000](http://localhost:3000)
+- API (exemplos):
+  - GET itens: [http://localhost:3000/items](http://localhost:3000/items)
+  - GET item por id: [http://localhost:3000/items/1](http://localhost:3000/items/1)
+  - POST item: `POST http://localhost:3000/items` com JSON no corpo
+  - PUT item: `PUT http://localhost:3000/items/1` com JSON no corpo
+  - DELETE item: `DELETE http://localhost:3000/items/1`
+
+### Exemplos de requisições (cURL)
+
+```bash
+# GET
+curl http://localhost:3000/items
+
+# POST
+curl -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Novo Item",
+    "description": "Descrição do item",
+    "image": "./trilha.jpg",
+    "difficulty": "Média",
+    "distanceKm": 3.2,
+    "durationMin": 120,
+    "bestSeason": "Ano todo",
+    "location": "MG",
+    "photos": []
+  }'
+
+# PUT
+curl -X PUT http://localhost:3000/items/1 \
+  -H "Content-Type: application/json" \
+  -d '{ "title": "Item Atualizado" }'
+
+# DELETE
+curl -X DELETE http://localhost:3000/items/1
+```
+
+### Onde colocar os prints
+
+- Adicione as imagens de testes (GET, POST, PUT, DELETE) e da aba Network no diretório `docs/` (crie se necessário) e substitua os placeholders acima.
 
 ## **Orientações Gerais**
 
