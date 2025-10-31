@@ -168,6 +168,67 @@
                 <div id="autor-container"></div>
             </div>
         </section>
+        <section id="crud" class="py-5" aria-label="Administração de Itens">
+            <div class="container">
+                <h3 class="display-5 fw-bold text-center text-primary mb-4">Administração de Itens (CRUD)</h3>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3" id="crud-form-title">Cadastrar novo item</h5>
+                                <form id="crud-form" class="row g-3" autocomplete="off">
+                                    <input type="hidden" id="item-id" />
+                                    <div class="col-12">
+                                        <label for="item-title" class="form-label">Título</label>
+                                        <input type="text" class="form-control" id="item-title" required />
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="item-description" class="form-label">Descrição</label>
+                                        <textarea class="form-control" id="item-description" rows="3" required></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="item-image" class="form-label">Imagem (URL)</label>
+                                        <input type="text" class="form-control" id="item-image" placeholder="./trilha.jpg" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="item-difficulty" class="form-label">Dificuldade</label>
+                                        <input type="text" class="form-control" id="item-difficulty" placeholder="Fácil / Média / Difícil" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="item-distance" class="form-label">Distância (km)</label>
+                                        <input type="number" step="0.1" class="form-control" id="item-distance" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="item-duration" class="form-label">Duração (min)</label>
+                                        <input type="number" class="form-control" id="item-duration" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="item-season" class="form-label">Melhor época</label>
+                                        <input type="text" class="form-control" id="item-season" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="item-location" class="form-label">Localização</label>
+                                        <input type="text" class="form-control" id="item-location" />
+                                    </div>
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="submit" class="btn btn-success" id="submit-button">Cadastrar</button>
+                                        <button type="button" class="btn btn-secondary d-none" id="cancel-edit">Cancelar edição</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow h-100">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">Itens cadastrados</h5>
+                                <div id="items-admin-list" class="list-group small"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
     <footer class="site-footer bg-dark text-light py-4" role="contentinfo">
         <div class="container">

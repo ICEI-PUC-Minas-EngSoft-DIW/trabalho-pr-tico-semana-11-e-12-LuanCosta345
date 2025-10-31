@@ -1,65 +1,17 @@
-// Estrutura JSON dos itens (dados fictícios) — escopo global
-const ITEMS = [
-  {
-    id: 'trilha-canion',
-    title: 'Trilha do Cânion',
-    description: 'Percurso entre rochas e leito de rio até o cânion.',
-    image: './trilha.jpg',
-    difficulty: 'Média',
-    distanceKm: 6.5,
-    durationMin: 180,
-    bestSeason: 'Maio a Agosto',
-    location: 'Conceição do Mato Dentro - MG',
-    photos: [
-      { src: './trilha.jpg', title: 'Trecho da trilha' },
-      { src: './trechoDoRioPedras.jpg', title: 'Rio com pedras' }
-    ]
-  },
-  {
-    id: 'poco-cachoeira',
-    title: 'Poço da Cachoeira',
-    description: 'Chegada ao poço principal com vista da queda.',
-    image: './poço.jpg',
-    difficulty: 'Difícil',
-    distanceKm: 18,
-    durationMin: 420,
-    bestSeason: 'Junho a Setembro',
-    location: 'Parque do Tabuleiro - MG',
-    photos: [
-      { src: './poço.jpg', title: 'Poço principal' },
-      { src: './riachoQuedaCachoeira.jpg', title: 'Riacho e queda' }
-    ]
-  },
-  {
-    id: 'mirante-superior',
-    title: 'Mirante Superior',
-    description: 'Vista panorâmica para fotografias e contemplação.',
-    image: './mirante.jpg',
-    difficulty: 'Média',
-    distanceKm: 4.2,
-    durationMin: 150,
-    bestSeason: 'Ano todo',
-    location: 'Serra do Espinhaço - MG',
-    photos: [
-      { src: './mirante.jpg', title: 'Mirante superior' },
-      { src: './PanoramaMontanha.jpg', title: 'Panorama das montanhas' }
-    ]
-  }
-];
+const API_URL = '/items';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('App inicializado');
 
-  // Renderização dinâmica dos cards na home
-  const cardsContainer = document.getElementById('cards-container');
-  if (cardsContainer) {
-    renderHomeCards(ITEMS, cardsContainer);
-  }
-
-  // Carrossel de destaques na home
-  const carouselContainer = document.getElementById('carousel-container');
-  if (carouselContainer) {
-    renderHighlightsCarousel(ITEMS, carouselContainer);
+  // Renderização dinâmica dos cards e carrossel a partir da API
+  const [cardsContainer, carouselContainer] = [
+    document.getElementById('cards-container'),
+    document.getElementById('carousel-container')
+  ];
+  if (cardsContainer || carouselContainer) {
+    const items = await fetchItems();
+    if (cardsContainer) renderHomeCards(items, cardsContainer);
+    if (carouselContainer) renderHighlightsCarousel(items, carouselContainer);
   }
 
   // Seção do autor
@@ -71,9 +23,51 @@ document.addEventListener('DOMContentLoaded', () => {
   // Renderização da página de detalhes quando aplicável
   const detailsContainer = document.getElementById('detalhes-container');
   if (detailsContainer) {
-    renderDetailsPage(detailsContainer);
+    await renderDetailsPage(detailsContainer);
   }
+
+  // CRUD (seção administrativa)
+  setupCrudSection();
 });
+
+async function fetchItems() {
+  const response = await fetch(API_URL);
+  if (!response.ok) return [];
+  return await response.json();
+}
+
+async function fetchItemById(id) {
+  const response = await fetch(`${API_URL}/${encodeURIComponent(id)}`);
+  if (!response.ok) return null;
+  return await response.json();
+}
+
+async function createItem(data) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) throw new Error('Erro ao criar item');
+  return await response.json();
+}
+
+async function updateItem(id, data) {
+  const response = await fetch(`${API_URL}/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) throw new Error('Erro ao atualizar item');
+  return await response.json();
+}
+
+async function deleteItem(id) {
+  const response = await fetch(`${API_URL}/${encodeURIComponent(id)}`, {
+    method: 'DELETE'
+  });
+  if (!response.ok) throw new Error('Erro ao excluir item');
+}
 
 function renderHomeCards(items, container) {
   if (!Array.isArray(items)) return;
@@ -163,7 +157,7 @@ function renderHighlightsCarousel(items, container) {
     const h5 = document.createElement('h5');
     h5.textContent = item.title;
     const p = document.createElement('p');
-    p.textContent = item.description;
+    p.textContent = item.description || '';
     const link = document.createElement('a');
     link.href = `detalhes.html?id=${encodeURIComponent(item.id)}`;
     link.className = 'btn btn-warning btn-sm';
@@ -224,7 +218,7 @@ function renderAuthorSection(container) {
   container.appendChild(card);
 }
 
-function renderDetailsPage(container) {
+async function renderDetailsPage(container) {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
 
@@ -233,7 +227,7 @@ function renderDetailsPage(container) {
     return;
   }
 
-  const item = ITEMS.find((i) => i.id === id);
+  const item = await fetchItemById(id);
   if (!item) {
     container.innerHTML = '<div class="alert alert-danger" role="alert">Item não encontrado.</div>';
     return;
@@ -243,30 +237,30 @@ function renderDetailsPage(container) {
 
   const colImg = document.createElement('div');
   colImg.className = 'col-lg-6';
-  const img = document.createElement('img');
-  img.src = item.image;
-  img.alt = item.title;
-  img.className = 'img-fluid rounded shadow';
-  colImg.appendChild(img);
+  const imgEl = document.createElement('img');
+  imgEl.src = item.image || '';
+  imgEl.alt = item.title || '';
+  imgEl.className = 'img-fluid rounded shadow';
+  colImg.appendChild(imgEl);
 
   const colText = document.createElement('div');
   colText.className = 'col-lg-6 d-flex align-items-center';
   const content = document.createElement('div');
   const h1 = document.createElement('h2');
   h1.className = 'fw-bold text-primary mb-3';
-  h1.textContent = item.title;
+  h1.textContent = item.title || '';
   const p = document.createElement('p');
   p.className = 'lead';
-  p.textContent = item.description;
+  p.textContent = item.description || '';
 
-  // Lista com 5+ detalhes
   const detailsList = document.createElement('ul');
   detailsList.className = 'list-unstyled mt-3';
-  const d1 = document.createElement('li'); d1.innerHTML = `<strong>Dificuldade:</strong> ${item.difficulty}`;
-  const d2 = document.createElement('li'); d2.innerHTML = `<strong>Distância:</strong> ${item.distanceKm} km`;
-  const d3 = document.createElement('li'); d3.innerHTML = `<strong>Duração:</strong> ${Math.round(item.durationMin/60)}h ${item.durationMin%60}min`;
-  const d4 = document.createElement('li'); d4.innerHTML = `<strong>Melhor época:</strong> ${item.bestSeason}`;
-  const d5 = document.createElement('li'); d5.innerHTML = `<strong>Localização:</strong> ${item.location}`;
+  const d1 = document.createElement('li'); d1.innerHTML = `<strong>Dificuldade:</strong> ${item.difficulty || '-'}`;
+  const d2 = document.createElement('li'); d2.innerHTML = `<strong>Distância:</strong> ${item.distanceKm ?? '-'} km`;
+  const durationMin = Number(item.durationMin || 0);
+  const d3 = document.createElement('li'); d3.innerHTML = `<strong>Duração:</strong> ${Math.floor(durationMin/60)}h ${durationMin%60}min`;
+  const d4 = document.createElement('li'); d4.innerHTML = `<strong>Melhor época:</strong> ${item.bestSeason || '-'}`;
+  const d5 = document.createElement('li'); d5.innerHTML = `<strong>Localização:</strong> ${item.location || '-'}`;
   detailsList.appendChild(d1); detailsList.appendChild(d2); detailsList.appendChild(d3); detailsList.appendChild(d4); detailsList.appendChild(d5);
 
   const back = document.createElement('a');
@@ -283,7 +277,6 @@ function renderDetailsPage(container) {
   container.appendChild(colImg);
   container.appendChild(colText);
 
-  // Seção de fotos vinculadas
   const fotosContainer = document.getElementById('fotos-container');
   if (fotosContainer) {
     fotosContainer.innerHTML = '';
@@ -313,6 +306,123 @@ function renderDetailsPage(container) {
     });
     fotosContainer.appendChild(row);
   }
+}
+
+function setupCrudSection() {
+  const form = document.getElementById('crud-form');
+  const list = document.getElementById('items-admin-list');
+  if (!form || !list) return;
+
+  const hiddenId = document.getElementById('item-id');
+  const title = document.getElementById('item-title');
+  const description = document.getElementById('item-description');
+  const image = document.getElementById('item-image');
+  const difficulty = document.getElementById('item-difficulty');
+  const distance = document.getElementById('item-distance');
+  const duration = document.getElementById('item-duration');
+  const season = document.getElementById('item-season');
+  const locationInput = document.getElementById('item-location');
+  const submitBtn = document.getElementById('submit-button');
+  const cancelBtn = document.getElementById('cancel-edit');
+  const formTitle = document.getElementById('crud-form-title');
+
+  async function refresh() {
+    const items = await fetchItems();
+    renderAdminList(items);
+    const cardsContainer = document.getElementById('cards-container');
+    const carouselContainer = document.getElementById('carousel-container');
+    if (cardsContainer) renderHomeCards(items, cardsContainer);
+    if (carouselContainer) renderHighlightsCarousel(items, carouselContainer);
+  }
+
+  function toPayload() {
+    return {
+      title: title.value.trim(),
+      description: description.value.trim(),
+      image: image.value.trim() || './trilha.jpg',
+      difficulty: difficulty.value.trim() || '-',
+      distanceKm: distance.value ? Number(distance.value) : 0,
+      durationMin: duration.value ? Number(duration.value) : 0,
+      bestSeason: season.value.trim() || '-',
+      location: locationInput.value.trim() || '-',
+      photos: []
+    };
+  }
+
+  function clearForm() {
+    hiddenId.value = '';
+    form.reset();
+    submitBtn.textContent = 'Cadastrar';
+    cancelBtn.classList.add('d-none');
+    formTitle.textContent = 'Cadastrar novo item';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      if (hiddenId.value) {
+        await updateItem(hiddenId.value, toPayload());
+      } else {
+        await createItem(toPayload());
+      }
+      clearForm();
+      await refresh();
+    } catch (err) {
+      alert('Falha ao salvar item.');
+      console.error(err);
+    }
+  });
+
+  cancelBtn.addEventListener('click', () => clearForm());
+
+  function renderAdminList(items) {
+    list.innerHTML = '';
+    items.forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'list-group-item d-flex justify-content-between align-items-center';
+      row.innerHTML = `<span class="text-truncate" style="max-width:65%"><strong>#${item.id}</strong> - ${item.title}</span>`;
+      const actions = document.createElement('div');
+      actions.className = 'btn-group btn-group-sm';
+      const edit = document.createElement('button');
+      edit.className = 'btn btn-outline-primary';
+      edit.textContent = 'Editar';
+      edit.addEventListener('click', () => {
+        hiddenId.value = item.id;
+        title.value = item.title || '';
+        description.value = item.description || '';
+        image.value = item.image || '';
+        difficulty.value = item.difficulty || '';
+        distance.value = item.distanceKm ?? '';
+        duration.value = item.durationMin ?? '';
+        season.value = item.bestSeason || '';
+        locationInput.value = item.location || '';
+        submitBtn.textContent = 'Salvar alterações';
+        cancelBtn.classList.remove('d-none');
+        formTitle.textContent = 'Editar item';
+      });
+      const del = document.createElement('button');
+      del.className = 'btn btn-outline-danger';
+      del.textContent = 'Excluir';
+      del.addEventListener('click', async () => {
+        if (confirm(`Excluir o item "${item.title}"?`)) {
+          try {
+            await deleteItem(item.id);
+            await refresh();
+          } catch (err) {
+            alert('Falha ao excluir.');
+            console.error(err);
+          }
+        }
+      });
+      actions.appendChild(edit);
+      actions.appendChild(del);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+  }
+
+  // Inicializa lista
+  refresh();
 }
 
 
